@@ -118,11 +118,12 @@ com.sony.dtv.netflixmanager
 com.sony.dtv.scrums.action.tvdotactionactivitymanagerplugin
 
 # Streaming / media apps the owner does not use; keep any you use
-com.netflix.ninja
-com.amazon.amazonvideo.livingroom
-com.amazon.aiv.us                                # old Amazon Instant Video thin client, duplicate
-com.google.android.youtube.tv
-in.startv.hotstar
+# Kept for this sample: Netflix, Prime Video, YouTube and Hotstar.
+# com.netflix.ninja
+# com.amazon.amazonvideo.livingroom
+# com.amazon.aiv.us                                # old Amazon Instant Video thin client, duplicate
+# com.google.android.youtube.tv
+# in.startv.hotstar
 com.jio.media.stb.ondemand
 com.discoveryplus.tv.android
 com.mxtech.videoplayer.ad
@@ -151,5 +152,5 @@ com.sony.dtv.tvlaunchercustomizer
 com.sony.dtv.tvxlauncher.titlelist
 com.google.android.tvrecommendations
 com.google.android.tvtutorials
-com.google.android.backdrop
+# com.google.android.backdrop  # Kept enabled for Google's screensaver.
 com.google.android.tvlauncher

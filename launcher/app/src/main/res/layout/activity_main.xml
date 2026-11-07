@@ -340,6 +340,13 @@
                     android:nextFocusDown="@+id/grid" />
 
                 <TextView
+                    android:id="@+id/btnScreenSaver"
+                    style="@style/TopButton"
+                    android:text="@string/screensaver"
+                    android:drawableStart="@drawable/ic_screensaver"
+                    android:nextFocusDown="@+id/grid" />
+
+                <TextView
                     android:id="@+id/btnWifi"
                     style="@style/TopButton"
                     android:maxWidth="180dp"
@@ -401,6 +408,7 @@
                 android:overScrollMode="never"
                 android:scrollbars="none"
                 android:descendantFocusability="afterDescendants" />
+
         </FrameLayout>
     </LinearLayout>
 

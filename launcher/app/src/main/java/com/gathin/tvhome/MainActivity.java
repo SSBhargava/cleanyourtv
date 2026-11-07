@@ -590,7 +590,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (lunar) lunarDate.setVisibility(View.VISIBLE);
         greetingName = cfg.greetingName;
         if (cfg.dateBelowClock) moveDateBelowClock();
-        if (cfg.dateBelowClock && cfg.iconOnlyButtons && !cfg.topMenu
+        if (cfg.dateBelowClock && !cfg.topMenu
                 && !getResources().getBoolean(R.bool.rtl_menu_bar)) {
             alignDateBelowIconsWithClock();
         }
@@ -813,8 +813,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
 
         btnInputs = findViewById(R.id.btnInputs);
+        View btnScreenSaver = findViewById(R.id.btnScreenSaver);
         View btnSettings = findViewById(R.id.btnSettings);
         btnInputs.setOnClickListener(v -> showInputs());
+        btnScreenSaver.setOnClickListener(v -> startScreensaver());
         btnWifi.setOnClickListener(v -> openNetworkPill());
         btnVpn.setOnClickListener(v -> openVpnPill());
         btnWifi.setOnLongClickListener(v -> {
@@ -860,6 +862,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // label up to date, which the menu's Wi-Fi row shows.
             showInputsPill = false;
             btnInputs.setVisibility(View.GONE);
+            btnScreenSaver.setVisibility(View.GONE);
             btnWifi.setVisibility(View.GONE);
             ((TextView) btnSettings).setText(R.string.settings);
             ((TextView) btnSettings).setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_settings, 0, 0, 0);
@@ -908,6 +911,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v.getId() == rightButton;
         };
         btnInputs.setOnKeyListener(pillKeys);
+        btnScreenSaver.setOnKeyListener(pillKeys);
         btnWifi.setOnKeyListener(pillKeys);
         btnVpn.setOnKeyListener(pillKeys);
         btnSettings.setOnKeyListener(pillKeys);
@@ -915,7 +919,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         btnLibraryTop.setOnKeyListener(pillKeys);
         for (View button : topAppButtons) button.setOnKeyListener(pillKeys);
         if (advancedEffects) {
-            List<View> pills = new ArrayList<>(Arrays.asList(btnInputs, btnWifi, btnVpn, btnReorder, btnLibraryTop, btnSettings));
+            List<View> pills = new ArrayList<>(Arrays.asList(btnInputs, btnScreenSaver, btnWifi, btnVpn, btnReorder, btnLibraryTop, btnSettings));
             pills.addAll(topAppButtons);
             for (View button : pills) {
                 button.setOnFocusChangeListener((view, focused) -> view.animate()
@@ -2525,7 +2529,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         buttons.setGravity(Gravity.CENTER_VERTICAL);
     }
 
-    /** With the date below, keep the icons beside the clock rather than beside the last date line. */
+    /** With the date below, keep the trailing button row centred beside the time rather than the date line. */
     private void alignDateBelowIconsWithClock() {
         View clock = findViewById(R.id.clock);
         View clockRow = (View) clock.getParent();
@@ -3662,6 +3666,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         PopupWindow popup = glassPopup(panel, (int) (220 * density));
         // Inputs opens its own list once this one has closed.
         if (showInputsMenuRow) addInputRow(rows, popup, R.drawable.ic_input, getString(R.string.inputs), -1, () -> root.post(this::showInputs));
+        addInputRow(rows, popup, R.drawable.ic_screensaver, getString(R.string.screensaver), -1, this::startScreensaver);
         addInputRow(rows, popup, R.drawable.ic_wifi, getString(R.string.quick_network), -1, this::openNetworkPill);
         CharSequence network = wifiIconOnly ? btnWifi.getContentDescription() : btnWifi.getText();
         if (!TextUtils.isEmpty(network)) {
@@ -3681,6 +3686,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         popup.setWidth(Math.max((int) (220 * density), Math.min(panel.getMeasuredWidth(), (int) (360 * density))));
         dropIn(popup, panel, anchor, getResources().getBoolean(R.bool.rtl_menu_bar) ? Gravity.START : Gravity.END);
         rows.getChildAt(0).requestFocus();
+    }
+
+    /** Try the TV's selected screensaver, retaining the clock when firmware cannot start it. */
+    private void startScreensaver() {
+        Intent dream = new Intent(Intent.ACTION_MAIN)
+                .setClassName("com.android.systemui", "com.android.systemui.Somnambulator");
+        try {
+            startActivity(dream);
+            // Some firmware exposes the shortcut but immediately returns without starting a dream.
+            root.postDelayed(() -> {
+                if (!isFinishing() && !isDestroyed() && hasWindowFocus()) {
+                    startActivity(new Intent(this, ClockActivity.class));
+                }
+            }, 2000);
+            return;
+        } catch (ActivityNotFoundException | SecurityException unavailable) {
+            // Missing or restricted system shortcut: use the existing offline clock.
+        }
+        startActivity(new Intent(this, ClockActivity.class));
     }
 
     /** The header opens launcher settings directly; hold OK keeps the extra home actions available. */
